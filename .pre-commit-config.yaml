@@ -1,0 +1,73 @@
+---
+default_language_version:
+  python: python3.10
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.6.0
+  hooks:
+  # General
+  - id: check-added-large-files
+  - id: end-of-file-fixer
+  - id: check-case-conflict
+  - id: check-shebang-scripts-are-executable
+  - id: check-merge-conflict
+  - id: trailing-whitespace
+  - id: detect-private-key
+
+  # JSON & YAML
+  - id: check-json
+  - id: pretty-format-json
+    args: [--autofix]
+  - id: check-yaml
+
+  # Python
+  - id: requirements-txt-fixer
+  - id: debug-statements
+  - id: check-builtin-literals
+
+# Python
+- repo: https://github.com/psf/black
+  rev: 24.3.0
+  hooks:
+  - id: black
+
+- repo: https://github.com/PyCQA/isort/
+  rev: 5.13.2
+  hooks:
+  - id: isort
+    args: [--profile, black]
+
+- repo: https://github.com/pylint-dev/pylint/
+  rev: v3.1.0
+  hooks:
+  - id: pylint
+    additional_dependencies:
+    - Flask==3.0.2
+    - sqlalchemy==2.0.27
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.9.0  # Use the sha / tag you want to point at
+  hooks:
+  - id: mypy
+    additional_dependencies:
+    - Flask==3.0.2
+    - sqlalchemy==2.0.27
+
+# YAML
+- repo: https://github.com/adrienverge/yamllint/
+  rev: v1.35.1
+  hooks:
+  - id: yamllint
+
+- repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+  rev: 0.2.3 # or other specific tag
+  hooks:
+  - id: yamlfmt
+    args: [--mapping, '2', --sequence, '2', --offset, '0', --width, '200']
+
+# Other
+- repo: https://github.com/igorshubovych/markdownlint-cli
+  rev: v0.39.0
+  hooks:
+  - id: markdownlint
