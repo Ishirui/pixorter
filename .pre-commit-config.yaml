@@ -43,16 +43,14 @@ repos:
   hooks:
   - id: pylint
     additional_dependencies:
-    - Flask==3.0.2
-    - sqlalchemy==2.0.27
+    - Pillow
 
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.9.0  # Use the sha / tag you want to point at
   hooks:
   - id: mypy
     additional_dependencies:
-    - Flask==3.0.2
-    - sqlalchemy==2.0.27
+    - Pillow
 
 # YAML
 - repo: https://github.com/adrienverge/yamllint/
