@@ -5,8 +5,11 @@ Module containing different methods for extracting a picture's creation date:
     - File creation date
 """
 
+import os
+import platform
 import re
 from datetime import datetime
+from pathlib import Path
 
 from PIL.Image import ExifTags, Image
 from pixorter import FILENAME_REGEXES
@@ -57,3 +60,23 @@ def get_date_from_exif(image: Image) -> datetime:
 
     # See https://stackoverflow.com/a/62077871
     return datetime.strptime(datetime_str, "%Y:%m:%d %H:%M:%S")
+
+
+def get_date_from_attrs(path: Path) -> datetime:
+    """
+    Try to get the snap date from file attrs.
+    Note that on Unix systems, there is no way to get file creation date from Python.
+    See http://stackoverflow.com/a/39501288/1709587 for explanation.
+    """
+    if platform.system() == "Windows":
+        ctime = os.path.getctime(path)
+    else:
+        stat = os.stat(path)
+        try:
+            ctime = stat.st_birthtime  # type: ignore
+        except AttributeError:
+            # We're probably on Linux. No easy way to get creation dates here,
+            # so we'll settle for when its content was last modified.
+            ctime = stat.st_mtime
+
+    return datetime.fromtimestamp(ctime)
