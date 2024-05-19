@@ -34,12 +34,17 @@ class Picture:
         return self.extension in VIDEO_EXTENSIONS
 
     def get_output_path(self, duplicate_count: int = 1) -> Path:
+        """
+        Get the canonical (output) Path for this Picture.
+        This is the path the image file will get moved to upon script completion.
+        """
         d = self.snap_date
         tag = "VID" if self.is_video else "IMG"
         ext = self.extension
 
-        ymdhm_str = f"{d.year}-{d.month}-{d.day}-{d.hour}h{d.minute}"
-        filename = f"{ymdhm_str}_{tag}{duplicate_count}.{ext}"
+        # pylint: disable-next=line-too-long
+        ymdhms_str = f"{d.year}-{d.month}-{d.day}-{d.hour}h{d.minute}{f'm{d.second}s' if d.second else ''}"
+        filename = f"{ymdhms_str}_{tag}{duplicate_count}.{ext}"
 
         folder = Path(f"{d.year}/{d.month}")
         return folder / filename

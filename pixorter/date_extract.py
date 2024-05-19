@@ -40,7 +40,7 @@ def get_date_from_filename(filename: str) -> datetime:
 
     datetime_parts = {
         k: int(match.group(k))
-        for k in ("year", "month", "day", "hour", "minute")
+        for k in ("year", "month", "day", "hour", "minute", "second")
         if match.group(k)
     }
     return datetime(**datetime_parts)  # type: ignore

@@ -17,7 +17,11 @@ MONTH_REGEX = r"(?P<month>0[0-9]|1[0-2])"
 DAY_REGEX = r"(?P<day>[0-2][0-9]|3[01])"
 HOUR_REGEX = r"(?P<hour>[01][0-9]|2[0-3])"
 MINUTE_REGEX = r"(?P<minute>[0-5][0-9])"
-HM_REGEX = rf"{HOUR_REGEX}[-_:HhT]?{MINUTE_REGEX}(?:[0-5][0-9])?"
+SECOND_REGEX = r"(?P<second>:[0-5][0-9])"
+
+# TODO: MATCH AND CAPTURE SECONDS TOO IF POSSIBLE
+
+HM_REGEX = rf"{HOUR_REGEX}[-_:HhT]?{MINUTE_REGEX}{SECOND_REGEX}?"
 
 DATE_REGEXES = [rf"{YEAR_REGEX}[-_ ]?{MONTH_REGEX}[-_ ]?{DAY_REGEX}"]
 # TODO: Add support for different dates formats (currently only yyyy-mm-dd)
