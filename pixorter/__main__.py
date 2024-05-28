@@ -6,6 +6,9 @@ import argparse
 import logging
 from pathlib import Path
 
+from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
+
 from .file_manip import copy, dry_run, hardlink, move, symlink
 from .globals import _CURR_PICTURE
 from .picture_manip import collect_pictures, get_path_couples
@@ -67,17 +70,25 @@ def main():
         logging.info("Dry running ! No changes will be applied.", extra=_CURR_PICTURE)
         operation = dry_run
 
-    pictures = collect_pictures(args.input_path)
-
-    for src_path, dest_path in get_path_couples(pictures):
-        abs_src_path = args.input_path.resolve() / src_path
-        logging.debug(
-            "Transformed %s -> %s", src_path, abs_src_path, extra=_CURR_PICTURE
+    # Discover existing pictures
+    # Convert to list so we can see the execution now and get the total n° of pics for later
+    with logging_redirect_tqdm():
+        pictures = list(
+            tqdm(collect_pictures(args.input_path), desc="Discovering Pictures...")
         )
+        n_pictures = len(list)
 
-        abs_dest_path = args.output_path.resolve() / dest_path
-        logging.debug(
-            "Transformed %s -> %s", dest_path, abs_dest_path, extra=_CURR_PICTURE
-        )
+        for src_path, dest_path in tqdm(
+            get_path_couples(pictures), total=n_pictures, desc="Moving Pictures"
+        ):
+            abs_src_path = args.input_path.resolve() / src_path
+            logging.debug(
+                "Transformed %s -> %s", src_path, abs_src_path, extra=_CURR_PICTURE
+            )
 
-        operation(abs_src_path, abs_dest_path)
+            abs_dest_path = args.output_path.resolve() / dest_path
+            logging.debug(
+                "Transformed %s -> %s", dest_path, abs_dest_path, extra=_CURR_PICTURE
+            )
+
+            operation(abs_src_path, abs_dest_path)
