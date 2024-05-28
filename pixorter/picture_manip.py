@@ -3,9 +3,9 @@
 from pathlib import Path
 from typing import Generator, Iterable, Set
 
-from .constants import SUPPORTED_EXTENSIONS
 from .date_extract import get_snap_date
 from .file_manip import walk_dir
+from .globals import _CURRENTLY_PROCESSING_PICTURES, SUPPORTED_EXTENSIONS
 from .picture import Picture
 
 
@@ -25,8 +25,10 @@ def get_path_couples(
     used_paths: Set[Path] = set()
 
     for picture in pictures:
+        _CURRENTLY_PROCESSING_PICTURES.append(picture)
         duplicate_count = 1
         while (output_path := picture.get_output_path(duplicate_count)) in used_paths:
             duplicate_count += 1
 
         yield picture.source_path, output_path
+        _CURRENTLY_PROCESSING_PICTURES.pop()

@@ -15,7 +15,7 @@ from pathlib import Path
 from PIL.Image import ExifTags, Image
 from PIL.Image import open as open_image
 
-from .constants import FILENAME_REGEXES
+from .globals import FILENAME_REGEXES
 
 DATETIME_TAGS = {
     name: id

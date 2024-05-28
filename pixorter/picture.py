@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from .constants import VIDEO_EXTENSIONS
+from .globals import VIDEO_EXTENSIONS
 
 
 @dataclass

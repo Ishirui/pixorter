@@ -1,9 +1,10 @@
 """
-Global-ish configuration options and constants for use in parts of the script
+Global-ish configuration options and globals for use in parts of the script
 """
 
 import logging
 import re
+from typing import Any, List
 
 IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "bmp", "tif", "tiff", "gif", "heic"}
 
@@ -33,3 +34,7 @@ FILENAME_REGEX_STRS = [
 
 logging.debug("Loaded FILENAME_REGEXES:\n%s", "\n- ".join(FILENAME_REGEX_STRS))
 FILENAME_REGEXES = [re.compile(x) for x in FILENAME_REGEX_STRS]
+
+# Keep track of the picture currently being processed
+# Use Any to prevent circular import
+_CURRENTLY_PROCESSING_PICTURES: List[Any] = []
