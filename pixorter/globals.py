@@ -1,17 +1,15 @@
 """
-Global-ish configuration options and globals for use in parts of the script
+Global-ish configuration options and state for use in parts of the script
 """
 
-import logging
 import re
-from typing import Any, List
+from typing import Any, Dict
 
 IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "bmp", "tif", "tiff", "gif", "heic"}
 
 VIDEO_EXTENSIONS = {"mp4", "mpv", "mkv", "mov", "3gp"}
 
 SUPPORTED_EXTENSIONS = IMAGE_EXTENSIONS | VIDEO_EXTENSIONS
-logging.debug("Supported file extensions: %s", SUPPORTED_EXTENSIONS)
 
 YEAR_REGEX = r"(?P<year>(?:20|19)[0-9]{2})"
 MONTH_REGEX = r"(?P<month>0[0-9]|1[0-2])"
@@ -32,9 +30,9 @@ FILENAME_REGEX_STRS = [
     rf"(?:{date_regex})[-_ ]?(?:{HM_REGEX})?" for date_regex in DATE_REGEXES
 ] + [rf"(?:{HM_REGEX})?[-_ ]?(?:{date_regex})" for date_regex in DATE_REGEXES]
 
-logging.debug("Loaded FILENAME_REGEXES:\n%s", "\n- ".join(FILENAME_REGEX_STRS))
 FILENAME_REGEXES = [re.compile(x) for x in FILENAME_REGEX_STRS]
 
 # Keep track of the picture currently being processed
+# FOR USE IN LOGGING ONLY
 # Use Any to prevent circular import
-_CURRENTLY_PROCESSING_PICTURES: List[Any] = []
+_CURR_PICTURE: Dict[str, Any] = {"picture": None}

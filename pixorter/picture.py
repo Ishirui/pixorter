@@ -18,6 +18,12 @@ class Picture:
     source_path: Path
     snap_date: datetime
 
+    def __str__(self) -> str:
+        return f"{self.source_path} ({self.snap_date})"
+
+    def __repr__(self) -> str:
+        return f"Picture({self.source_path!r}, {self.snap_date!r})"
+
     @property
     def extension(self) -> str:
         ext = self.source_path.suffix.lower()
