@@ -15,10 +15,12 @@ def collect_pictures(root_path: Path) -> Generator[Picture, None, None]:
             yield Picture(source_path=file, snap_date=get_snap_date(file))
 
 
-def get_output_paths(pictures: Iterable[Picture]) -> Generator[Path, None, None]:
+def get_path_couples(
+    pictures: Iterable[Picture],
+) -> Generator[tuple[Path, Path], None, None]:
     """
-    Get all the output paths for the pictures passed as input.
-    The function makes sure no duplicate Paths are returned (even if the snap datetimes are equal)
+    Get all the src/dest paths for the pictures passed as input.
+    The function makes sure no duplicate paths are returned (even if the snap datetimes are equal)
     """
     used_paths: Set[Path] = set()
 
@@ -27,4 +29,4 @@ def get_output_paths(pictures: Iterable[Picture]) -> Generator[Path, None, None]
         while (output_path := picture.get_output_path(duplicate_count)) in used_paths:
             duplicate_count += 1
 
-        yield output_path
+        yield picture.source_path, output_path

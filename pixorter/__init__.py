@@ -1,5 +1,3 @@
 """
-Library code for the Pixorter script.
+Small Python script for sorting, grouping and renaming pictures by date.
 """
-
-from .constants import *
