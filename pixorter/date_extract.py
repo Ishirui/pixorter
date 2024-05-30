@@ -66,7 +66,7 @@ def get_date_from_video_metadata(path: Path):
         media = json.loads(ffprobe.execute())
         datetime_str: str = media["streams"][0]["tags"]["creation_time"]
     except (KeyError, json.JSONDecodeError, FFmpegError) as exc:
-        logging.exception("Failed to get video metadata ! for %s", path, exc_info=exc)
+        logging.error("Failed to get video metadata ! for %s. Error: %s", path, exc)
         raise NoMatchException() from exc
 
     datetime_str = datetime_str.split(".")[0]  # Remove trailing decimal
@@ -185,7 +185,6 @@ def get_snap_date(img_path: Path) -> datetime:
     # 4.
     if metadata_datetime is None and filename_datetime is None:
         msg = f"Could not determine snap_date for {img_path} !"
-        logging.error(msg)
         # TODO: Implement CLI option for relaxing and using attr-based extraction
         raise NoMatchException(msg)
 
