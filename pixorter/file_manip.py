@@ -5,8 +5,6 @@ import shutil
 from pathlib import Path
 from typing import Generator
 
-from .globals import _CURR_PICTURE
-
 
 def walk_dir(directory: Path) -> Generator[Path, None, None]:
     for folder, _, files in directory.walk():
@@ -30,28 +28,28 @@ def op_common(src_file: Path, dest_file: Path):
 
 def move(src_file: Path, dest_file: Path):
     op_common(src_file, dest_file)
-    logging.info("Moving %s -> %s...", src_file, dest_file, extra=_CURR_PICTURE)
+    logging.info("Moving %s -> %s...", src_file, dest_file)
     shutil.move(src_file, dest_file)
 
 
 def copy(src_file: Path, dest_file: Path):
     op_common(src_file, dest_file)
-    logging.info("Copying %s |-> %s...", src_file, dest_file, extra=_CURR_PICTURE)
+    logging.info("Copying %s |-> %s...", src_file, dest_file)
     shutil.copy(src_file, dest_file)
 
 
 def symlink(src_file: Path, dest_file: Path):
     op_common(src_file, dest_file)
-    logging.info("Symlinking %s <- %s...", src_file, dest_file, extra=_CURR_PICTURE)
+    logging.info("Symlinking %s <- %s...", src_file, dest_file)
     dest_file.symlink_to(src_file)
 
 
 def hardlink(src_file: Path, dest_file: Path):
     op_common(src_file, dest_file)
-    logging.info("Hardlinking %s <-| %s...", src_file, dest_file, extra=_CURR_PICTURE)
+    logging.info("Hardlinking %s <-| %s...", src_file, dest_file)
     dest_file.hardlink_to(src_file)
 
 
 def dry_run(src_file: Path, dest_file: Path):
     op_common(src_file, dest_file)
-    logging.info("Running operation %s -> %s", src_file, dest_file, extra=_CURR_PICTURE)
+    logging.info("Running operation %s -> %s", src_file, dest_file)

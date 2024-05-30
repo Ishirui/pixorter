@@ -12,10 +12,10 @@ from .picture import Picture
 
 def collect_pictures(root_path: Path) -> Generator[Picture, None, None]:
     for file in walk_dir(root_path):
-        logging.debug("Considering file %s", file, extra=_CURR_PICTURE)
-        if file.suffix in SUPPORTED_EXTENSIONS:
+        logging.debug("Considering file %s", file)
+        if file.suffix[1:] in SUPPORTED_EXTENSIONS:
             snap_date = get_snap_date(file)
-            logging.debug("Extracted snap date: %s", snap_date, extra=_CURR_PICTURE)
+            logging.debug("Extracted snap date: %s", snap_date)
             yield Picture(source_path=file, snap_date=snap_date)
 
 
@@ -30,11 +30,11 @@ def get_path_couples(
 
     for picture in pictures:
         _CURR_PICTURE["picture"] = picture
-        logging.info("Considering picture %s...", picture, extra=_CURR_PICTURE)
+        logging.info("Considering picture %s...", picture)
         duplicate_count = 1
         while (output_path := picture.get_output_path(duplicate_count)) in used_paths:
             duplicate_count += 1
-        logging.debug("Got duplicate_count=%s", duplicate_count, extra=_CURR_PICTURE)
+        logging.debug("Got duplicate_count=%s", duplicate_count)
 
         yield picture.source_path, output_path
         _CURR_PICTURE["picture"] = None

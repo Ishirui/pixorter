@@ -19,14 +19,14 @@ class Picture:
     snap_date: datetime
 
     def __str__(self) -> str:
-        return f"{self.source_path} ({self.snap_date})"
+        return f"{self.source_path.relative_to(Path.cwd())} ({self.snap_date})"
 
     def __repr__(self) -> str:
         return f"Picture({self.source_path!r}, {self.snap_date!r})"
 
     @property
     def extension(self) -> str:
-        ext = self.source_path.suffix.lower()
+        ext = self.source_path.suffix.lower()[1:]
         match ext:
             case "jpeg":
                 return "jpg"

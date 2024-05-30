@@ -15,7 +15,7 @@ from pathlib import Path
 from PIL.Image import ExifTags, Image
 from PIL.Image import open as open_image
 
-from .globals import _CURR_PICTURE, FILENAME_REGEXES
+from .globals import FILENAME_REGEXES
 
 DATETIME_TAGS = {
     name: id
@@ -108,41 +108,39 @@ def get_snap_date(img_path: Path) -> datetime:
         # 1.
         exif_datetime = get_date_from_exif(img)
     except NoMatchException:
-        logging.debug("Could not extract snap_date from EXIF", extra=_CURR_PICTURE)
+        logging.debug("Could not extract snap_date from EXIF")
         exif_datetime = None
     else:
         logging.debug(
             "Successfully Extracted EXIF snap_date: %s",
             exif_datetime,
-            extra=_CURR_PICTURE,
         )
 
     try:
         # 2.
         filename_datetime = get_date_from_filename(img_path.name)
     except NoMatchException:
-        logging.debug("Could not extract snap_date from filename", extra=_CURR_PICTURE)
+        logging.debug("Could not extract snap_date from filename")
         filename_datetime = None
     else:
         logging.debug(
             "Successfully Extracted filename snap_date: %s",
             filename_datetime,
-            extra=_CURR_PICTURE,
         )
 
     # 3a.
     if (exif_datetime is not None) ^ (filename_datetime is not None):
         if exif_datetime is not None:
-            logging.debug("Using EXIF snap_date", extra=_CURR_PICTURE)
+            logging.debug("Using EXIF snap_date")
             return exif_datetime
 
-        logging.debug("Using filename snap_date", extra=_CURR_PICTURE)
+        logging.debug("Using filename snap_date")
         return filename_datetime  # type: ignore
 
     # 4.
     if exif_datetime is None and filename_datetime is None:
         msg = f"Could not determine snap_date for {img_path} !"
-        logging.error(msg, extra=_CURR_PICTURE)
+        logging.error(msg)
         # TODO: Implement CLI option for relaxing and using attr-based extraction
         raise NoMatchException(msg)
 
@@ -151,17 +149,16 @@ def get_snap_date(img_path: Path) -> datetime:
 
     # 3b.
     if exif_datetime == filename_datetime:
-        logging.debug("Both datetimes match.", extra=_CURR_PICTURE)
+        logging.debug("Both datetimes match.")
         return exif_datetime
 
     if exif_datetime.date() == filename_datetime.date():
         logging.warning(
             "EXIF and filename-based datetime only loosely match. Using EXIF.",
-            extra=_CURR_PICTURE,
         )
         return exif_datetime
 
     msg = "EXIF and filename-based datetime do not match !"
     # TODO: Implement CLI option for relaxing this
-    logging.error(msg, extra=_CURR_PICTURE)
+    logging.error(msg)
     raise NoMatchException(msg)

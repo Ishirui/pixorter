@@ -36,15 +36,32 @@ def parse_arguments() -> argparse.Namespace:
         "--loglevel",
         # pylint: disable-next=protected-access
         choices=logging._nameToLevel.keys(),
+        default="WARNING",
     )
 
-    return parser.parse_args()
+    output = parser.parse_args()
+    output.input_path = output.input_path.resolve()
+    output.output_path = output.output_path.resolve()
+
+    return output
 
 
 def setup_logging(level: int):
+    """Setup logging for the script (message format, extra args etc.)"""
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(picture)s - %(message)s"
     )
+
+    # See stackoverflow.com/questions/17558552/how-do-i-add-custom-field-to-python-log-format-string
+    old_factory = logging.getLogRecordFactory()
+
+    def record_factory(*args, **kwargs):
+        record = old_factory(*args, **kwargs)
+        record.picture = _CURR_PICTURE["picture"]
+        return record
+
+    logging.setLogRecordFactory(record_factory)
+
     logging.getLogger().setLevel(level)
 
 
@@ -53,7 +70,7 @@ def main():
     args = parse_arguments()
     setup_logging(args.loglevel)
 
-    logging.debug("Parsed arguments: %s", vars(args), extra=_CURR_PICTURE)
+    logging.debug("Parsed arguments: %s", vars(args))
 
     if args.hardlinks:
         operation = hardlink
@@ -64,10 +81,10 @@ def main():
     else:
         operation = move
 
-    logging.info("Selected operation: %s.", operation.__name__, extra=_CURR_PICTURE)
+    logging.info("Selected operation: %s.", operation.__name__)
 
     if args.dry_run:
-        logging.info("Dry running ! No changes will be applied.", extra=_CURR_PICTURE)
+        logging.info("Dry running ! No changes will be applied.")
         operation = dry_run
 
     # Discover existing pictures
@@ -76,19 +93,19 @@ def main():
         pictures = list(
             tqdm(collect_pictures(args.input_path), desc="Discovering Pictures...")
         )
-        n_pictures = len(list)
+        n_pictures = len(pictures)
+        logging.info("Found %s pictures", n_pictures)
 
         for src_path, dest_path in tqdm(
             get_path_couples(pictures), total=n_pictures, desc="Moving Pictures"
         ):
             abs_src_path = args.input_path.resolve() / src_path
-            logging.debug(
-                "Transformed %s -> %s", src_path, abs_src_path, extra=_CURR_PICTURE
-            )
+            logging.debug("Transformed %s -> %s", src_path, abs_src_path)
 
             abs_dest_path = args.output_path.resolve() / dest_path
-            logging.debug(
-                "Transformed %s -> %s", dest_path, abs_dest_path, extra=_CURR_PICTURE
-            )
+            logging.debug("Transformed %s -> %s", dest_path, abs_dest_path)
 
             operation(abs_src_path, abs_dest_path)
+
+
+main()

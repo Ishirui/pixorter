@@ -34,5 +34,6 @@ FILENAME_REGEXES = [re.compile(x) for x in FILENAME_REGEX_STRS]
 
 # Keep track of the picture currently being processed
 # FOR USE IN LOGGING ONLY
+# Use Dict so that the same object is always pointed to, would not work by simply reassigning
 # Use Any to prevent circular import
 _CURR_PICTURE: Dict[str, Any] = {"picture": None}
