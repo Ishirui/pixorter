@@ -61,8 +61,14 @@ def get_date_from_exif(image: Image) -> datetime:
     if datetime_str is None:
         raise NoMatchException()
 
-    # See https://stackoverflow.com/a/62077871
-    return datetime.strptime(datetime_str, "%Y:%m:%d %H:%M:%S")
+    try:
+        # See https://stackoverflow.com/a/62077871
+        return datetime.strptime(datetime_str, "%Y:%m:%d %H:%M:%S")
+    except ValueError as e:
+        logging.warning(
+            "Invalid date found in EXIF data ! (%s). Ignoring...", datetime_str
+        )
+        raise NoMatchException() from e
 
 
 def get_date_from_attrs(path: Path) -> datetime:

@@ -4,17 +4,25 @@ import logging
 from pathlib import Path
 from typing import Generator, Iterable, Set
 
-from .date_extract import get_snap_date
+from .date_extract import NoMatchException, get_snap_date
 from .file_manip import walk_dir
 from .globals import _CURR_PICTURE, SUPPORTED_EXTENSIONS
 from .picture import Picture
 
 
 def collect_pictures(root_path: Path) -> Generator[Picture, None, None]:
+    """Create Picture objects for all Pictures under root_path/"""
     for file in walk_dir(root_path):
         logging.debug("Considering file %s", file)
         if file.suffix[1:] in SUPPORTED_EXTENSIONS:
-            snap_date = get_snap_date(file)
+            try:
+                snap_date = get_snap_date(file)
+            except NoMatchException:
+                logging.error(
+                    "Could not determine snap_date for %s ! Skipping...", file
+                )
+                continue
+
             logging.debug("Extracted snap date: %s", snap_date)
             yield Picture(source_path=file, snap_date=snap_date)
 

@@ -105,7 +105,11 @@ def main():
             abs_dest_path = args.output_path.resolve() / dest_path
             logging.debug("Transformed %s -> %s", dest_path, abs_dest_path)
 
-            operation(abs_src_path, abs_dest_path)
+            try:
+                operation(abs_src_path, abs_dest_path)
+            # pylint: disable-next=broad-exception-caught
+            except Exception as exc:
+                logging.exception("Could not handle image %s !", src_path, exc_info=exc)
 
 
 main()
