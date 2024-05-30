@@ -1,10 +1,11 @@
 """
 Module containing different methods for extracting a picture's creation date:
     - Regex on the filename
-    - EXIF data
+    - EXIF / metadata
     - File creation date
 """
 
+import json
 import logging
 import os
 import platform
@@ -15,7 +16,13 @@ from pathlib import Path
 from PIL.Image import ExifTags, Image
 from PIL.Image import open as open_image
 
-from .globals import FILENAME_REGEXES
+try:
+    from ffmpeg import FFmpeg, FFmpegError  # type: ignore
+except ImportError:
+    pass
+
+
+from .globals import FILENAME_REGEXES, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
 
 DATETIME_TAGS = {
     name: id
@@ -45,6 +52,32 @@ def get_date_from_filename(filename: str) -> datetime:
         if match.group(k)
     }
     return datetime(**datetime_parts)  # type: ignore
+
+
+def get_date_from_video_metadata(path: Path):
+    """Try to get datetime info from the video's metadata"""
+    ffprobe = FFmpeg(executable="ffprobe").input(
+        path,
+        print_format="json",
+        show_streams=None,
+    )
+
+    try:
+        media = json.loads(ffprobe.execute())
+        datetime_str: str = media["streams"][0]["tags"]["creation_time"]
+    except (KeyError, json.JSONDecodeError, FFmpegError) as exc:
+        logging.exception("Failed to get video metadata ! for %s", path, exc_info=exc)
+        raise NoMatchException() from exc
+
+    datetime_str = datetime_str.split(".")[0]  # Remove trailing decimal
+
+    try:
+        return datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%S")
+    except ValueError as e:
+        logging.warning(
+            "Invalid date found in video metadata ! (%s). Ignoring...", datetime_str
+        )
+        raise NoMatchException() from e
 
 
 def get_date_from_exif(image: Image) -> datetime:
@@ -108,18 +141,24 @@ def get_snap_date(img_path: Path) -> datetime:
         4. If none worked, error out.
             > This can be relaxed with a CLI option, emitting a warning and extract from file attrs.
     """
-    img: Image = open_image(img_path)
 
     try:
         # 1.
-        exif_datetime = get_date_from_exif(img)
+        img_extension = img_path.suffix[1:]
+        if img_extension in IMAGE_EXTENSIONS:
+            img: Image = open_image(img_path)
+            metadata_datetime = get_date_from_exif(img)
+        elif img_extension in VIDEO_EXTENSIONS:
+            metadata_datetime = get_date_from_video_metadata(img_path)
+        else:
+            raise NoMatchException("Unsupported extension !")
     except NoMatchException:
-        logging.debug("Could not extract snap_date from EXIF")
-        exif_datetime = None
+        logging.debug("Could not extract snap_date from EXIF / metadata")
+        metadata_datetime = None
     else:
         logging.debug(
-            "Successfully Extracted EXIF snap_date: %s",
-            exif_datetime,
+            "Successfully Extracted EXIF / metadata-based snap_date: %s",
+            metadata_datetime,
         )
 
     try:
@@ -135,36 +174,37 @@ def get_snap_date(img_path: Path) -> datetime:
         )
 
     # 3a.
-    if (exif_datetime is not None) ^ (filename_datetime is not None):
-        if exif_datetime is not None:
-            logging.debug("Using EXIF snap_date")
-            return exif_datetime
+    if (metadata_datetime is not None) ^ (filename_datetime is not None):
+        if metadata_datetime is not None:
+            logging.debug("Using EXIF / metadata-based snap_date")
+            return metadata_datetime
 
         logging.debug("Using filename snap_date")
         return filename_datetime  # type: ignore
 
     # 4.
-    if exif_datetime is None and filename_datetime is None:
+    if metadata_datetime is None and filename_datetime is None:
         msg = f"Could not determine snap_date for {img_path} !"
         logging.error(msg)
         # TODO: Implement CLI option for relaxing and using attr-based extraction
         raise NoMatchException(msg)
 
     # Make mypy happy
-    assert exif_datetime is not None and filename_datetime is not None
+    assert metadata_datetime is not None and filename_datetime is not None
 
     # 3b.
-    if exif_datetime == filename_datetime:
+    if metadata_datetime == filename_datetime:
         logging.debug("Both datetimes match.")
-        return exif_datetime
+        return metadata_datetime
 
-    if exif_datetime.date() == filename_datetime.date():
+    if metadata_datetime.date() == filename_datetime.date():
         logging.warning(
-            "EXIF and filename-based datetime only loosely match. Using EXIF.",
+            "EXIF / metadata-based and filename-based datetime only loosely match. "
+            + "Using EXIF / metadata-based."
         )
-        return exif_datetime
+        return metadata_datetime
 
-    msg = "EXIF and filename-based datetime do not match !"
+    msg = "EXIF / metadata-based and filename-based datetime do not match !"
     # TODO: Implement CLI option for relaxing this
     logging.error(msg)
     raise NoMatchException(msg)

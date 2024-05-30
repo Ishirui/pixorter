@@ -2,12 +2,28 @@
 Global-ish configuration options and state for use in parts of the script
 """
 
+import logging
 import re
 from typing import Any, Dict
 
-IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "bmp", "tif", "tiff", "gif", "heic"}
+IMAGE_EXTENSIONS = {
+    "jpg",
+    "jpeg",
+    "png",
+    "bmp",
+    "tif",
+    "tiff",
+    "gif",
+}  # HEIC does not work with PIL
 
-VIDEO_EXTENSIONS = {"mp4", "mpv", "mkv", "mov", "3gp"}
+try:
+    # pylint: disable-next=unused-import
+    import ffmpeg  # type: ignore
+
+    VIDEO_EXTENSIONS = {"mp4", "mpv", "mkv", "mov", "3gp"}
+except ImportError:
+    logging.warning("Could not import python_ffmpeg. Disabling video support.")
+    VIDEO_EXTENSIONS = set()
 
 SUPPORTED_EXTENSIONS = IMAGE_EXTENSIONS | VIDEO_EXTENSIONS
 
