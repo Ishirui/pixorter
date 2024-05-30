@@ -1,0 +1,31 @@
+[project]
+name = "pixorter"
+description = "Small Python app/script for sorting, grouping and renaming pictures by date."
+authors = [
+  {name = "Pierre-Louis Veyrenc", email = "veyrencpierrelouis@gmail.com"}
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+
+dynamic = ["version"]
+
+dependencies = [
+    "tqdm",
+    "Pillow"
+]
+
+[project.optional-dependencies]
+video = ["python-ffmpeg"]
+
+[project.urls]
+Repository = "https://github.com/Ishirui/pixorter.git"
+"Bug Tracker" = "https://github.com/Ishirui/pixorter/issues"
+
+[project.scripts]
+pixorter = "pixorter:main"
+
+[build-system]
+requires = ["setuptools >= 61.0", "setuptools_scm >=8 "]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
