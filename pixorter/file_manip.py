@@ -2,14 +2,15 @@
 
 import logging
 import shutil
+from os import walk
 from pathlib import Path
 from typing import Generator
 
 
 def walk_dir(directory: Path) -> Generator[Path, None, None]:
-    for folder, _, files in directory.walk():
+    for folder, _, files in walk(directory.resolve()):
         for file in files:
-            yield folder / file
+            yield Path(folder).joinpath(file)
 
 
 def op_common(src_file: Path, dest_file: Path):

@@ -27,13 +27,13 @@ class Picture:
     @property
     def extension(self) -> str:
         ext = self.source_path.suffix.lower()[1:]
-        match ext:
-            case "jpeg":
-                return "jpg"
-            case "tiff":
-                return "tif"
-            case _:
-                return ext
+        if ext == "jpeg":
+            return "jpg"
+
+        if ext == "tiff":
+            return "tif"
+
+        return ext
 
     @property
     def is_video(self) -> bool:
