@@ -11,6 +11,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 
 from .file_manip import copy, dry_run, hardlink, move, symlink
 from .globals import _CURR_PICTURE
+from .picture import Picture
 from .picture_manip import collect_pictures, get_path_couples
 
 
@@ -41,6 +42,8 @@ def parse_arguments() -> argparse.Namespace:
 
     output = parser.parse_args()
     output.input_path = output.input_path.resolve()
+    # pylint: disable-next=protected-access
+    Picture._root_path = output.input_path
     output.output_path = output.output_path.resolve()
 
     return output

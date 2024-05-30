@@ -5,6 +5,7 @@ Module holding the definition for the Picture class.
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import ClassVar
 
 from .globals import VIDEO_EXTENSIONS
 
@@ -15,11 +16,14 @@ class Picture:
     Main class representing a single image file.
     """
 
+    # Class var
+    _root_path: ClassVar[Path] = Path("/")
+
     source_path: Path
     snap_date: datetime
 
     def __str__(self) -> str:
-        return f"{self.source_path.relative_to(Path.cwd())} ({self.snap_date})"
+        return f"{self.source_path.relative_to(self._root_path)} ({self.snap_date})"
 
     def __repr__(self) -> str:
         return f"Picture({self.source_path!r}, {self.snap_date!r})"
